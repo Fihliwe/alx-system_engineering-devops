@@ -1,16 +1,41 @@
-#config server
+#!/usr/bin/env bash
+# Configure server using puppet
 
-package { 'nginx':
-provider => 'apt',
-}
-exec {'hlbtn_page':
-command => '/usr/bin/sudo /bin/echo Holberton School > /var/www/html/index.nginx-debian.html',
-}
-exec {'redirect_page':
+# defines a Puppet class called nginx_server that 
+#  encapsulates the configuration for the Nginx server.
+class nginx_server {
+  package { 'nginx':
+    ensure => installed,
+  }
 
-command => '/usr/bin/sudo /bin/sed -i "66i rewrite ^/redirect_me https://www.youtube.com/ permanent;" /etc/nginx/sites-available/default',
-}
-exec {'start_server':
+#  manages the Nginx service.
+  service { 'nginx':
+    ensure => running,
+    enable => true,
+    require => Package['nginx'],
+  }
+# manages the Nginx configuration file located at /etc/nginx/sites-available/default.
+  file { '/etc/nginx/sites-available/default':
+    ensure  => present,
+    content => "
+      server {
+        listen      80 default_server;
+        listen      [::]:80 default_server;
+        root        /var/www/html;
+        index       index.html index.htm;
 
-command => '/usr/bin/sudo /usr/sbin/service nginx start',
+        location / {
+          return 200 'Hello World!';
+        }
+
+        location /redirect_me {
+          return 301 http://cuberule.com/;
+        }
+      }
+    ",
+    notify => Service['nginx'],
+  }
 }
+#  includes the nginx_server class, ensuring that it gets applied.
+include nginx_server
+
