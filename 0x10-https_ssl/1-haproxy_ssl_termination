@@ -10,14 +10,14 @@ defaults
 	timeout client  30s
 	timeout server  30s
 
-frontend th3gr00t-tech-frontend
+frontend fihliwe-tech-frontend
 	bind *:80
-	bind *:443 ssl crt /etc/haproxy/certs/th3gr00t.tech.pem
+	bind *:443 ssl crt /etc/haproxy/certs/fihliwe.tech.pem
 	http-request redirect scheme https unless { ssl_fc }
 	http-request set-header X-Forwarded-Proto https
-	default_backend th3gr00t-tech-backend
+	default_backend fihliwe-tech-backend
 
-backend th3gr00t-tech-backend
-	balance roundrobini
+backend fihliwe-tech-backend
+	balance roundrobin
 	server 480692-web-01 100.26.215.114 check
 	server 480692-lb-01 18.210.16.249 check
