@@ -1,23 +1,32 @@
 global
-        log /dev/log    local0
-	stats socket /run/haproxy/admin.sock mode 660 level admin
+    log /dev/log    local0
+    log /dev/log    local1 notice
+    chroot /var/lib/haproxy
+    stats socket /run/haproxy/admin.sock mode 660 level admin expose-fd listeners
+    stats timeout 30s
+    user haproxy
+    group haproxy
+    daemon
 
 defaults
-        log     global
-        mode    http
-        option  httplog
-	timeout connect  10s
-	timeout client  30s
-	timeout server  30s
+    log     global
+    mode    http
+    option  httplog
+    option  dontlognull
+    timeout connect 10s
+    timeout client  30s
+    timeout server  30s
 
 frontend fihliwe-tech-frontend
-	bind *:80
-	bind *:443 ssl crt /etc/haproxy/certs/fihliwe.tech.pem
-	http-request redirect scheme https unless { ssl_fc }
-	http-request set-header X-Forwarded-Proto https
-	default_backend fihliwe-tech-backend
+    bind *:80
+    redirect scheme https code 301 if !{ ssl_fc }
 
-backend fihliwe-tech-backend
-	balance roundrobin
-	server 480692-web-01 100.26.215.114 check
-	server 480692-lb-01 18.210.16.249 check
+frontend fihliwe_tech-frontend
+    bind *:443 ssl crt /etc/haproxy/certs/www.fihliwe.tech.pem
+    reqadd X-Forwarded-Proto:\ https
+    default_backend fihliwe-tech
+
+backend fihliwe-tech backend
+    balance roundrobin
+    server 480692-web-01 100.26.215.114 check
+    server 480692-web-02 100.25.45.160 check
