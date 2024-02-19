@@ -3,38 +3,18 @@
 import requests
 import sys
 
-def todo_progress(employee_id):
-    """
-    Method to display on the standard output the employee TODO list progress
-    """
-    
-    url = f"https://jsonplaceholder.typicode.com/users/{employee_id}/todos"
-    
-    response = requests.get(url)
-    
-    if response.status_code == 200:
-        todos = response.json()
-        
-        completed_tasks = [todo['title'] for todo in todos if todo['completed']]
-        
-        total_tasks = len(todos)
-        
-        num_completed = len(completed_tasks)
-        
-        employee_name = todos[0]['name']
-        
-        print(f"Employee {employee_name} is done with tasks ({num_completed}/{total_tasks}):")
-        
-        for task  in completed_tasks:
-            print(f"\t{task}")
-        else:
-            print("Failed to retrieve data. Please try again later.")
-            
-
-if __name__ =="__main__":
-    if len(sys.argv) !=2:
-        print("Usage python script.py <employee_id>")
+if __name__ == "__main__":
+    if len(sys.argv) != 2:
+        print("Usage: {} <user_id>".format(sys.argv[0]))
         sys.exit(1)
         
-    employee_id = sys.argv[1]
-    todo_progress(employee_id)
+        
+    url = "https://jsonplaceholder.typicode.com/"
+    user_id = sys.argv[1]
+    user = requests.get(url + "users/{}".format(sys.argv[1])).json()
+    todos = requests.get(url + "todos", params={"userId": sys.argv[1]}).json()
+
+    completed = [t.get("title") for t in todos if t.get("completed") is True]
+    print("Employee {} is done with tasks({}/{}):".format(
+        user.get("name"), len(completed), len(todos)))
+    [print("\t {}".format(c)) for c in completed]
