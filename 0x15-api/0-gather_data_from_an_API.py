@@ -1,5 +1,7 @@
 #!/usr/bin/python3
-
+'''
+Module for json API
+'''
 import requests
 import sys
 
